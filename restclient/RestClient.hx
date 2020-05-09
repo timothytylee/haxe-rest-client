@@ -15,50 +15,50 @@ class RestClient
     public static var preferHttpMethodOverride:Bool = false;
     #end
     
-    public static function postAsync(url:String, onData:String->Void = null, parameters:Map<String, String> = null, onError:String->Void = null):Void
+    public static function postAsync(url:String, onData:String->Void = null, parameters:Map<String, String> = null, onError:String->Void = null, headers:Map<String, String> = null):Void
     {
-        RestClient.requestAsync("POST", url, onData, parameters, onError);
+        RestClient.requestAsync("POST", url, onData, parameters, onError, headers);
     }
     
-    public static function getAsync(url:String, onData:String->Void = null, parameters:Map<String, String> = null, onError:String->Void = null):Void
+    public static function getAsync(url:String, onData:String->Void = null, parameters:Map<String, String> = null, onError:String->Void = null, headers:Map<String, String> = null):Void
     {
-        RestClient.requestAsync("GET", url, onData, parameters, onError);
+        RestClient.requestAsync("GET", url, onData, parameters, onError, headers);
     }
     
-    public static function putAsync(url:String, onData:String->Void = null, parameters:Map<String, String> = null, onError:String->Void = null):Void
+    public static function putAsync(url:String, onData:String->Void = null, parameters:Map<String, String> = null, onError:String->Void = null, headers:Map<String, String> = null):Void
     {
-        RestClient.requestAsync("PUT", url, onData, parameters, onError);
+        RestClient.requestAsync("PUT", url, onData, parameters, onError, headers);
     }
     
-    public static function deleteAsync(url:String, onData:String->Void = null, parameters:Map<String, String> = null, onError:String->Void = null):Void
+    public static function deleteAsync(url:String, onData:String->Void = null, parameters:Map<String, String> = null, onError:String->Void = null, headers:Map<String, String> = null):Void
     {
-        RestClient.requestAsync("DELETE", url, onData, parameters, onError);
+        RestClient.requestAsync("DELETE", url, onData, parameters, onError, headers);
     }
     
     // No synchronous requests/sockets on Flash
     #if !flash
-    public static function post(url:String, parameters:Map<String, String> = null, onError:String->Void = null):String
+    public static function post(url:String, parameters:Map<String, String> = null, onError:String->Void = null, headers:Map<String, String> = null):String
     {
-        return RestClient.request("POST", url, parameters, onError);
+        return RestClient.request("POST", url, parameters, onError, headers);
     }
     
-    public static function get(url:String, parameters:Map<String, String> = null, onError:String->Void = null):String
+    public static function get(url:String, parameters:Map<String, String> = null, onError:String->Void = null, headers:Map<String, String> = null):String
     {
-        return RestClient.request("GET", url, parameters, onError);
+        return RestClient.request("GET", url, parameters, onError, headers);
     }
     
-    public static function put(url:String, parameters:Map<String, String> = null, onError:String->Void = null):String
+    public static function put(url:String, parameters:Map<String, String> = null, onError:String->Void = null, headers:Map<String, String> = null):String
     {
-        return RestClient.request("PUT", url, parameters, onError);
+        return RestClient.request("PUT", url, parameters, onError, headers);
     }
     
-    public static function delete(url:String, parameters:Map<String, String> = null, onError:String->Void = null):String
+    public static function delete(url:String, parameters:Map<String, String> = null, onError:String->Void = null, headers:Map<String, String> = null):String
     {
-        return RestClient.request("DELETE", url, parameters, onError);
+        return RestClient.request("DELETE", url, parameters, onError, headers);
     }
     #end
     
-    public static function requestAsync(verb:String, url:String, onData:String->Void = null, parameters:Map<String, String> = null, onError:String->Void = null):Void
+    public static function requestAsync(verb:String, url:String, onData:String->Void = null, parameters:Map<String, String> = null, onError:String->Void = null, headers:Map<String, String> = null):Void
     {
         var post:Bool = (verb != "GET");
         var httpRequest:Http = RestClient.buildHttpRequest(
@@ -66,13 +66,14 @@ class RestClient
             true,
             url,
             parameters,
+            headers,
             true,
             onData,
             onError);
         httpRequest.request(post);
     }
     
-    private static function request(verb:String, url:String, parameters:Map<String, String> = null, async:Bool = false, onData:String->Void = null, onError:String->Void = null):String
+    private static function request(verb:String, url:String, parameters:Map<String, String> = null, async:Bool = false, onData:String->Void = null, onError:String->Void = null, headers:Map<String, String> = null):String
     {
         var result:String;
         
@@ -87,6 +88,7 @@ class RestClient
             useOverride,
             url,
             parameters,
+            headers,
             false,
             function(data:String)
             {
@@ -108,7 +110,7 @@ class RestClient
         #end
     }
     
-    private static function buildHttpRequest(verb:String, useOverride:Bool, url:String, parameters:Map<String, String> = null, async:Bool = false, onData:String->Void = null, onError:String->Void = null):Http
+    private static function buildHttpRequest(verb:String, useOverride:Bool, url:String, parameters:Map<String, String> = null, headers:Map<String, String> = null, async:Bool = false, onData:String->Void = null, onError:String->Void = null):Http
     {
         var httpRequest = new Http(url);
             
@@ -131,6 +133,14 @@ class RestClient
             for (x in parameters.keys())
             {
                 httpRequest.setParameter(x, parameters.get(x));
+            }
+        }
+        
+        if (headers != null)
+        {
+            for (x in headers.keys())
+            {
+                httpRequest.setHeader(x, headers.get(x));
             }
         }
         
